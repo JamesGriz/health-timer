@@ -1,0 +1,110 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "health-timer"
+version = "0.1.0"
+description = "Smart break reminders for long computer sessions on macOS."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "James Gray" }]
+keywords = ["macos", "health", "break", "timer", "automation", "wellbeing"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: MacOS X",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS :: MacOS X",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Utilities",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.5",
+    "mypy>=1.10",
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "pre-commit>=3.7",
+    "build>=1.2",
+]
+
+[project.scripts]
+health-timer = "health_timer.daemon:main"
+
+[project.urls]
+Homepage = "https://github.com/JamesGriz/health-timer"
+Repository = "https://github.com/JamesGriz/health-timer"
+Issues = "https://github.com/JamesGriz/health-timer/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/health_timer"]
+
+# ─── Ruff ────────────────────────────────────────────────────────────────
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle
+    "F",    # pyflakes
+    "I",    # isort
+    "N",    # pep8-naming
+    "UP",   # pyupgrade
+    "B",    # bugbear
+    "SIM",  # simplify
+    "RUF",  # ruff
+    "S",    # bandit
+]
+ignore = [
+    "E501",   # line length handled by formatter
+    "S101",   # asserts in tests are fine
+    "S311",   # non-crypto random use is intentional
+    "S603",   # subprocess: we only call fixed system binaries with controlled args
+    "RUF001", # ambiguous unicode in strings (en-dash, × etc. are intentional for UX)
+    "RUF002", # ambiguous unicode in docstrings
+    "RUF003", # ambiguous unicode in comments
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+# ─── Mypy ────────────────────────────────────────────────────────────────
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unreachable = true
+files = ["src/health_timer"]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+
+# ─── Pytest ──────────────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = ["-ra", "--strict-markers", "--strict-config"]
+
+[tool.coverage.run]
+branch = true
+source = ["health_timer"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]
