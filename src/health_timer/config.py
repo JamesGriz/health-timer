@@ -38,6 +38,7 @@ class Config:
     idle_threshold_min: int = 3
     poll_sec: int = 30
     snooze_min: int = 5
+    inactive_nudge_min: int = 2  # idle this long while WORKING → "back to work" notification
 
 
 DEFAULT_CONFIG = Config()

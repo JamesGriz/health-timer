@@ -87,3 +87,11 @@ def break_complete(activity_name: str) -> None:
         "Back to it 💪",
         f"Hope that {activity_name.lower()} felt good — back at it for the next stint.",
     )
+
+
+def nudge_back_to_work(idle_min: float) -> None:
+    """Nudge the user back to the desk after an unscheduled idle stretch."""
+    notify(
+        "Still there? 👀",
+        f"You've been idle {idle_min:.0f} min — head back when you're ready.",
+    )

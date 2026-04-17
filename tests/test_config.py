@@ -36,6 +36,22 @@ def test_load_config_picks_up_overrides(tmp_path: Path) -> None:
     assert config.idle_threshold_min == DEFAULT_CONFIG.idle_threshold_min
 
 
+def test_default_config_values() -> None:
+    """Lock in the production defaults so a refactor can't quietly change them."""
+    assert DEFAULT_CONFIG.work_threshold_min == 45
+    assert DEFAULT_CONFIG.idle_threshold_min == 3
+    assert DEFAULT_CONFIG.poll_sec == 30
+    assert DEFAULT_CONFIG.snooze_min == 5
+    assert DEFAULT_CONFIG.inactive_nudge_min == 2
+
+
+def test_load_config_picks_up_inactive_nudge(tmp_path: Path) -> None:
+    path = tmp_path / "config.json"
+    path.write_text(json.dumps({"inactive_nudge_min": 5}))
+    config = load_config(path)
+    assert config.inactive_nudge_min == 5
+
+
 def test_load_config_ignores_unknown_keys(tmp_path: Path) -> None:
     path = tmp_path / "config.json"
     path.write_text(json.dumps({"work_threshold_min": 25, "garbage": "ignored"}))

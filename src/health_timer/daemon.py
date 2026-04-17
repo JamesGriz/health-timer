@@ -20,7 +20,7 @@ from . import __version__
 from .activities import Activity
 from .config import Config, DaemonState, load_config, load_state, save_state
 from .suggester import pick, record_pick
-from .ui import BreakChoice, ask_break, break_complete, notify
+from .ui import BreakChoice, ask_break, break_complete, notify, nudge_back_to_work
 
 logger = logging.getLogger("health_timer")
 
@@ -85,23 +85,34 @@ def run(config: Config, state: DaemonState) -> NoReturn:
     """Main loop. Runs forever; SIGINT/SIGTERM handled by ``main()``."""
     threshold_sec = config.work_threshold_min * 60
     idle_threshold_sec = config.idle_threshold_min * 60
+    inactive_nudge_sec = config.inactive_nudge_min * 60
 
     phase = Phase.WORKING
     current_activity: Activity | None = None
     break_until = 0.0
+    # In-memory only: tracks whether we've already nudged for the current idle stretch.
+    # Reset whenever the user becomes active again.
+    inactive_nudge_sent = False
 
     logger.info(
-        "starting health-timer v%s — threshold=%ds idle=%ds poll=%ds",
+        "starting health-timer v%s — threshold=%ds idle=%ds nudge=%ds poll=%ds",
         __version__,
         threshold_sec,
         idle_threshold_sec,
+        inactive_nudge_sec,
         config.poll_sec,
     )
 
     while True:
         now = time.time()
         idle = get_idle_seconds()
-        logger.debug("phase=%s active=%.0fs idle=%.0fs", phase.name, state.active_seconds, idle)
+        logger.debug(
+            "phase=%s active=%.0fs idle=%.0fs nudge_sent=%s",
+            phase.name,
+            state.active_seconds,
+            idle,
+            inactive_nudge_sent,
+        )
 
         if phase == Phase.WORKING:
             if idle < idle_threshold_sec:
@@ -109,8 +120,19 @@ def run(config: Config, state: DaemonState) -> NoReturn:
             if state.active_seconds >= threshold_sec and idle < idle_threshold_sec:
                 phase = Phase.BREAK_SUGGESTED
 
+            # Inactivity nudge: fire once per idle stretch while WORKING.
+            if idle >= inactive_nudge_sec and not inactive_nudge_sent:
+                logger.info("inactivity nudge fired (idle=%.0fs)", idle)
+                nudge_back_to_work(idle / 60)
+                inactive_nudge_sent = True
+            elif idle < inactive_nudge_sec and inactive_nudge_sent:
+                # User is back at the desk — arm the nudge for the next idle stretch.
+                inactive_nudge_sent = False
+
         if phase == Phase.BREAK_SUGGESTED:
             phase, current_activity, break_until = _suggest_and_handle(config, state)
+            # Don't immediately re-nudge once we return to WORKING from a snooze/skip.
+            inactive_nudge_sent = False
             save_state(state)
 
         elif phase == Phase.ON_BREAK:
@@ -122,6 +144,7 @@ def run(config: Config, state: DaemonState) -> NoReturn:
                 state.last_break_at = now
                 current_activity = None
                 phase = Phase.WORKING
+                inactive_nudge_sent = False
                 save_state(state)
 
         time.sleep(config.poll_sec)
