@@ -97,12 +97,7 @@ def test_scan_overdue_finds_checkbox_task_past_due(tmp_path: Path) -> None:
 def test_scan_overdue_finds_frontmatter_task(tmp_path: Path) -> None:
     vault = _build_vault(tmp_path)
     (vault / "Projects" / "overdue-task.md").write_text(
-        "---\n"
-        "type: task\n"
-        "due: 2025-01-01\n"
-        "status: open\n"
-        "---\n\n"
-        "body\n"
+        "---\ntype: task\ndue: 2025-01-01\nstatus: open\n---\n\nbody\n"
     )
     overdue = scan_overdue(vault, dt.date(2026, 4, 20))
     assert len(overdue) == 1
@@ -111,11 +106,7 @@ def test_scan_overdue_finds_frontmatter_task(tmp_path: Path) -> None:
 def test_scan_overdue_skips_done_frontmatter_tasks(tmp_path: Path) -> None:
     vault = _build_vault(tmp_path)
     (vault / "Projects" / "closed-task.md").write_text(
-        "---\n"
-        "type: task\n"
-        "due: 2025-01-01\n"
-        "status: done\n"
-        "---\n"
+        "---\ntype: task\ndue: 2025-01-01\nstatus: done\n---\n"
     )
     assert scan_overdue(vault, dt.date(2026, 4, 20)) == []
 
@@ -124,9 +115,7 @@ def test_scan_overdue_ignores_archive_tree(tmp_path: Path) -> None:
     vault = _build_vault(tmp_path)
     archived = vault / "Archive" / "2025-Q4" / "old"
     archived.mkdir(parents=True)
-    (archived / "tasks.md").write_text(
-        "- [ ] historical <!-- due:2025-01-01 -->\n"
-    )
+    (archived / "tasks.md").write_text("- [ ] historical <!-- due:2025-01-01 -->\n")
     assert scan_overdue(vault, dt.date(2026, 4, 20)) == []
 
 

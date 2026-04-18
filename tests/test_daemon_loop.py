@@ -89,7 +89,7 @@ def _drive_loop(
 
         class _DatetimeStub(real_datetime):  # type: ignore[misc,valid-type]
             @classmethod
-            def now(cls, tz: Any | None = None) -> Any:  # noqa: ARG003
+            def now(cls, tz: Any | None = None) -> Any:
                 return next(now_iter)  # type: ignore[arg-type]
 
         patches.append(patch.object(daemon.dt, "datetime", _DatetimeStub))
@@ -258,9 +258,7 @@ def test_capture_activity_spawns_claude(tmp_path: Any) -> None:
     )
 
     with patch.object(daemon, "pick", return_value=capture_activity):
-        calls = _drive_loop(
-            cfg, state, idle_sequence=[5, 5], ask_break_return=BreakChoice.START
-        )
+        calls = _drive_loop(cfg, state, idle_sequence=[5, 5], ask_break_return=BreakChoice.START)
 
     assert len(calls["spawn_terminal"]) == 1
     # args are (vault_path, command) positional
@@ -274,9 +272,7 @@ def test_overdue_scan_is_throttled(tmp_path: Any) -> None:
     vault = tmp_path / "vault"
     init_skeleton(vault)
     (vault / "Projects" / "demo").mkdir(parents=True)
-    (vault / "Projects" / "demo" / "tasks.md").write_text(
-        "- [ ] stale <!-- due:2020-01-01 -->\n"
-    )
+    (vault / "Projects" / "demo" / "tasks.md").write_text("- [ ] stale <!-- due:2020-01-01 -->\n")
 
     cfg = _short_config()
     cfg.overdue_scan_enabled = True

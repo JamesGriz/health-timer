@@ -41,10 +41,7 @@ def spawn_terminal(vault: Path, command: str, binary: str = "claude") -> None:
 
     cd_cmd = f"cd {_quote(str(vault))} && {_quote(binary)} {_quote(command)}"
     script = (
-        f'tell application "Terminal"\n'
-        f'  do script "{_escape_osa(cd_cmd)}"\n'
-        f"  activate\n"
-        f"end tell"
+        f'tell application "Terminal"\n  do script "{_escape_osa(cd_cmd)}"\n  activate\nend tell'
     )
     try:
         subprocess.run(

@@ -50,9 +50,7 @@ def parse_cron(expr: str) -> tuple[int | None, int, int]:
     raise ValueError(f"malformed cron expression {expr!r}")
 
 
-def _target_today(
-    now: dt.datetime, hour: int, minute: int, dow: int | None
-) -> dt.datetime | None:
+def _target_today(now: dt.datetime, hour: int, minute: int, dow: int | None) -> dt.datetime | None:
     """Return today's scheduled datetime, or None if today isn't a match day."""
     if dow is not None and now.weekday() != dow:
         return None
