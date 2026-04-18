@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
 
-Category = Literal["walk", "snack", "water", "stretch", "core", "yoga"]
+Category = Literal["walk", "snack", "water", "stretch", "core", "yoga", "capture"]
 TimeWindow = Literal["morning", "midday", "afternoon", "evening"]
 
 
@@ -272,6 +272,31 @@ CATALOG: list[Activity] = [
         category="yoga",
         duration_min=10,
         tod_fit={"morning": 0.5, "midday": 0.8, "afternoon": 1.2, "evening": 1.6},
+    ),
+    # ─── Capture (vault-integrated breaks) ────────────────────────────────
+    Activity(
+        id="capture_inbox",
+        display_name="Inbox clear",
+        description="Open one Inbox note. File it, zettel it, or bin it. One item only.",
+        category="capture",
+        duration_min=3,
+        tod_fit={"morning": 1.0, "midday": 1.1, "afternoon": 1.1, "evening": 0.9},
+    ),
+    Activity(
+        id="capture_zettel",
+        display_name="One atomic thought",
+        description="Capture a single idea as a zettel. Link it to one existing note.",
+        category="capture",
+        duration_min=3,
+        tod_fit={"morning": 1.1, "midday": 1.0, "afternoon": 1.1, "evening": 1.0},
+    ),
+    Activity(
+        id="capture_links",
+        display_name="Link two notes",
+        description="Open a random zettel. Find one existing note it connects to. Link them.",
+        category="capture",
+        duration_min=3,
+        tod_fit={"morning": 1.0, "midday": 1.0, "afternoon": 1.1, "evening": 1.0},
     ),
 ]
 

@@ -27,7 +27,7 @@ cd health-timer
 
 # 2. Try it foreground with a short threshold (90s instead of 45min)
 source .venv/bin/activate
-python -m health_timer --debug --threshold-sec 90 --poll-sec 5
+python -m life_os --debug --threshold-sec 90 --poll-sec 5
 
 # 3. Install as a LaunchAgent (auto-starts at login)
 ./scripts/install.sh
@@ -59,7 +59,7 @@ State persists at `~/.local/state/health-timer/state.json`. Logs at `~/Library/L
 
 ## Activity catalog
 
-Around 30 specific activities across 6 categories. Each has time-of-day fit weights so morning suggestions favour energising activities (yoga, core, walk) and evenings lean toward winding down (legs-up-the-wall, hip openers, herbal tea). Add your own in [`src/health_timer/activities.py`](src/health_timer/activities.py).
+Around 30 specific activities across 6 categories. Each has time-of-day fit weights so morning suggestions favour energising activities (yoga, core, walk) and evenings lean toward winding down (legs-up-the-wall, hip openers, herbal tea). Add your own in [`src/life_os/activities.py`](src/life_os/activities.py).
 
 ## Development
 

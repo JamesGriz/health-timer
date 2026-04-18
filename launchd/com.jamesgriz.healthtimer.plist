@@ -10,7 +10,7 @@
     <array>
         <string>__PYTHON__</string>
         <string>-m</string>
-        <string>health_timer</string>
+        <string>life_os</string>
     </array>
 
     <key>WorkingDirectory</key>

@@ -23,4 +23,4 @@ Relevant lines from `~/Library/Logs/healthtimer.log`.
 **Environment**
 - macOS version:
 - Python version (`python3 --version`):
-- health-timer version (`python3 -m health_timer --version`):
+- life-os version (`python3 -m life_os --version`):
