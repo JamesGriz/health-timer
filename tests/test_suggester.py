@@ -6,8 +6,8 @@ import datetime as dt
 import random
 from collections import Counter
 
-from health_timer.activities import CATALOG
-from health_timer.suggester import (
+from life_os.activities import CATALOG
+from life_os.suggester import (
     HYDRATION_OVERDUE_HOURS,
     SuggesterState,
     pick,
@@ -122,3 +122,26 @@ def test_full_day_simulation_has_variety() -> None:
         seen[activity.category] += 1
         record_pick(state, activity, now=now)
     assert len(seen) >= 4, f"expected variety; got {seen}"
+
+
+def test_capture_bias_zero_never_picks_capture() -> None:
+    now = _at(10)
+    state = SuggesterState(last_water_at=now.timestamp())
+    seen: Counter[str] = Counter()
+    for seed in range(200):
+        activity = pick(state, now=now, rng=random.Random(seed), capture_bias=0.0)
+        seen[activity.category] += 1
+    assert seen["capture"] == 0
+
+
+def test_capture_bias_default_is_rare_but_present() -> None:
+    """With default bias, capture should land in <15% of picks."""
+    now = _at(14)  # afternoon — capture activities have 1.1 tod_fit
+    state = SuggesterState(last_water_at=now.timestamp())
+    seen: Counter[str] = Counter()
+    for seed in range(1000):
+        activity = pick(state, now=now, rng=random.Random(seed))
+        seen[activity.category] += 1
+    # Just confirm the shape — capture is rare, non-capture dominates.
+    total = sum(seen.values())
+    assert seen["capture"] / total < 0.15

@@ -40,6 +40,30 @@ class Config:
     snooze_min: int = 5
     inactive_nudge_min: int = 2  # idle this long while WORKING → "back to work" notification
 
+    # ─── life-os: vault ────────────────────────────────────────────────────
+    vault_path: str | None = None  # None → default_vault_path()
+    vault_enabled: bool = False  # master opt-in; existing installs upgrade unchanged
+
+    # ─── life-os: rituals ──────────────────────────────────────────────────
+    rituals_enabled: bool = False  # off by default; flip to True once vault is ready
+    morning_journal_at: str = "08:00"
+    midday_inbox_at: str = "12:00"
+    evening_shutdown_at: str = "17:00"
+    weekly_review_at: str = "Sun 10:00"
+
+    # ─── life-os: overdue scan ─────────────────────────────────────────────
+    overdue_scan_enabled: bool = False
+    overdue_scan_interval_min: int = 60
+    overdue_notify_threshold: int = 1  # notify when >= N tasks are overdue
+
+    # ─── life-os: Claude CLI ───────────────────────────────────────────────
+    claude_invoke_mode: str = "dialog"  # notify_only | dialog | terminal | headless
+    claude_cli_path: str = "claude"
+
+    # ─── life-os: break-time capture ──────────────────────────────────────
+    capture_activities_enabled: bool = False
+    capture_activity_bias: float = 0.3  # multiplier on capture-category scores
+
 
 DEFAULT_CONFIG = Config()
 
@@ -67,6 +91,10 @@ class DaemonState:
     active_seconds: float = 0.0
     last_break_at: float | None = None
     suggester: SuggesterState = field(default_factory=SuggesterState)
+    # life-os additions — default to empty so existing state files load cleanly.
+    ritual_last_fired: dict[str, float] = field(default_factory=dict)
+    last_overdue_scan_at: float | None = None
+    schema_version: int = 1  # migrate.run_migration() bumps this to CURRENT_SCHEMA
 
 
 def load_state(path: Path = STATE_PATH) -> DaemonState:
@@ -89,6 +117,9 @@ def load_state(path: Path = STATE_PATH) -> DaemonState:
             last_category=suggester_data.get("last_category"),
             last_seen_per_id=dict(suggester_data.get("last_seen_per_id", {})),
         ),
+        ritual_last_fired=dict(data.get("ritual_last_fired", {})),
+        last_overdue_scan_at=data.get("last_overdue_scan_at"),
+        schema_version=int(data.get("schema_version", 1)),
     )
 
 

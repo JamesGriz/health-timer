@@ -21,6 +21,12 @@ class BreakChoice(Enum):
     SKIP = "skip"
 
 
+class RitualChoice(Enum):
+    OPEN = "open"
+    LATER = "later"
+    SKIP = "skip"
+
+
 def _osascript(script: str, timeout: int = 30) -> tuple[int, str, str]:
     try:
         proc = subprocess.run(
@@ -95,3 +101,29 @@ def nudge_back_to_work(idle_min: float) -> None:
         "Still there? 👀",
         f"You've been idle {idle_min:.0f} min — head back when you're ready.",
     )
+
+
+def ritual_dialog(title: str, body: str) -> RitualChoice:
+    """Ritual suggestion dialog — Open now / Later / Skip."""
+    script = (
+        f'display dialog "{_escape(body)}" '
+        f'with title "{_escape(title)}" '
+        'buttons {"Skip", "Later", "Open now"} '
+        'default button "Open now" '
+        "with icon note "
+        f"giving up after {DIALOG_TIMEOUT_SEC}"
+    )
+    code, out, err = _osascript(script, timeout=DIALOG_TIMEOUT_SEC + 10)
+    if code != 0:
+        if "User canceled" in err:
+            return RitualChoice.SKIP
+        logger.warning("ritual_dialog failed: %s", err)
+        return RitualChoice.SKIP
+
+    if "Open now" in out:
+        return RitualChoice.OPEN
+    if "Later" in out:
+        return RitualChoice.LATER
+    if "gave up" in out:
+        return RitualChoice.SKIP
+    return RitualChoice.SKIP

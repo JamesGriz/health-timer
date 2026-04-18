@@ -42,7 +42,7 @@ jobs:
         run: mypy src
 
       - name: Pytest
-        run: pytest -v --cov=health_timer --cov-report=term-missing --cov-report=xml
+        run: pytest -v --cov=life_os --cov-report=term-missing --cov-report=xml
 
       - name: Upload coverage
         if: matrix.python-version == '3.12'

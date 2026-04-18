@@ -6,7 +6,7 @@ from collections import Counter
 
 import pytest
 
-from health_timer.activities import CATALOG, time_window
+from life_os.activities import CATALOG, time_window
 
 
 def test_catalog_is_not_empty() -> None:

@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "health-timer"
-version = "0.1.0"
-description = "Smart break reminders for long computer sessions on macOS."
+name = "life-os"
+version = "0.2.0"
+description = "Second brain + smart break reminders for macOS — a Claude-Code-managed markdown vault with a scheduling daemon."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
@@ -35,7 +35,7 @@ dev = [
 ]
 
 [project.scripts]
-health-timer = "health_timer.daemon:main"
+health-timer = "life_os.daemon:main"
 
 [project.urls]
 Homepage = "https://github.com/JamesGriz/health-timer"
@@ -43,7 +43,7 @@ Repository = "https://github.com/JamesGriz/health-timer"
 Issues = "https://github.com/JamesGriz/health-timer/issues"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/health_timer"]
+packages = ["src/life_os"]
 
 # ─── Ruff ────────────────────────────────────────────────────────────────
 [tool.ruff]
@@ -84,7 +84,7 @@ quote-style = "double"
 python_version = "3.11"
 strict = true
 warn_unreachable = true
-files = ["src/health_timer"]
+files = ["src/life_os"]
 
 [[tool.mypy.overrides]]
 module = "tests.*"
@@ -98,7 +98,7 @@ addopts = ["-ra", "--strict-markers", "--strict-config"]
 
 [tool.coverage.run]
 branch = true
-source = ["health_timer"]
+source = ["life_os"]
 
 [tool.coverage.report]
 show_missing = true

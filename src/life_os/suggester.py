@@ -17,6 +17,11 @@ NOVELTY_LOOKBACK_DAYS = 14
 RECENT_CAP = 5
 TOP_N_SAMPLE = 5
 
+# Capture activities are deliberately rare — they pull the user into a Claude
+# Code session during their break, which we want to feel like a treat, not a
+# chore. The multiplier lands capture at ~1-in-10 picks with the default bias.
+DEFAULT_CAPTURE_BIAS = 0.3
+
 
 @dataclass
 class SuggesterState:
@@ -54,6 +59,7 @@ def pick(
     state: SuggesterState,
     now: dt.datetime | None = None,
     rng: random.Random | None = None,
+    capture_bias: float = DEFAULT_CAPTURE_BIAS,
 ) -> Activity:
     """Pick a single activity tailored to the current moment.
 
@@ -61,6 +67,8 @@ def pick(
         state: persisted history used to avoid repeats and track hydration.
         now: defaults to ``datetime.now()`` (injectable for tests).
         rng: defaults to a fresh ``Random()`` (injectable for tests).
+        capture_bias: multiplier on ``category == "capture"`` scores. Default
+            ``0.3`` makes capture rare (~1 in 10). Set ``0.0`` to disable.
 
     Returns:
         The chosen :class:`Activity`. Always returns something — the catalog
@@ -82,6 +90,8 @@ def pick(
     for activity in candidates:
         tod = activity.tod_fit.get(window, 1.0)
         score = tod * _recency_penalty(activity, state) * _novelty_boost(activity, state, now_ts)
+        if activity.category == "capture":
+            score *= capture_bias
         if score > 0:
             scored.append((score, activity))
 

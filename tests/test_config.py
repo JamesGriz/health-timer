@@ -5,14 +5,14 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from health_timer.config import (
+from life_os.config import (
     DEFAULT_CONFIG,
     DaemonState,
     load_config,
     load_state,
     save_state,
 )
-from health_timer.suggester import SuggesterState
+from life_os.suggester import SuggesterState
 
 
 def test_load_config_returns_defaults_when_missing(tmp_path: Path) -> None:
@@ -70,6 +70,9 @@ def test_state_round_trip(tmp_path: Path) -> None:
             last_category="water",
             last_seen_per_id={"a": 1700000000.0},
         ),
+        ritual_last_fired={"morning_journal": 1700000500.0},
+        last_overdue_scan_at=1700000600.0,
+        schema_version=2,
     )
     save_state(state, path)
     loaded = load_state(path)
@@ -79,6 +82,20 @@ def test_state_round_trip(tmp_path: Path) -> None:
     assert loaded.suggester.last_water_at == 1700000100.0
     assert loaded.suggester.last_category == "water"
     assert loaded.suggester.last_seen_per_id == {"a": 1700000000.0}
+    assert loaded.ritual_last_fired == {"morning_journal": 1700000500.0}
+    assert loaded.last_overdue_scan_at == 1700000600.0
+    assert loaded.schema_version == 2
+
+
+def test_load_state_defaults_new_fields_for_legacy_files(tmp_path: Path) -> None:
+    """A pre-0.2 state file should load cleanly with the new fields at defaults."""
+    path = tmp_path / "state.json"
+    path.write_text(json.dumps({"active_seconds": 10.0}))
+    loaded = load_state(path)
+    assert loaded.active_seconds == 10.0
+    assert loaded.ritual_last_fired == {}
+    assert loaded.last_overdue_scan_at is None
+    assert loaded.schema_version == 1
 
 
 def test_load_state_returns_default_when_missing(tmp_path: Path) -> None:

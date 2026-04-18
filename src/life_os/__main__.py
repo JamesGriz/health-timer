@@ -1,4 +1,4 @@
-"""Allow ``python -m health_timer``."""
+"""Allow ``python -m life_os``."""
 
 from .daemon import main
 
